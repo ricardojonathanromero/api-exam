@@ -5,6 +5,7 @@ import (
 	"github.com/banwire/api-exam/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"time"
 )
 
@@ -24,6 +25,15 @@ type repository struct {
 func initCtx() (context.Context, context.CancelFunc) {
 	ctx, c := context.WithTimeout(context.TODO(), 10*time.Second)
 	return ctx, c
+}
+
+func closeCursor(cursor *mongo.Cursor) {
+	ctx, _ := initCtx()
+	if cursor != nil {
+		if err := cursor.Close(ctx); err != nil {
+			log.Println("error trying to close cursor: ", err)
+		}
+	}
 }
 
 func NewRepo(sess *mongo.Client) *repository {

@@ -26,7 +26,7 @@ func (c *controller) calculateFee(commerceID primitive.ObjectID, amount float32)
 		return 0, 0, err
 	}
 
-	commission := float32(commerce.Commission / 100)
+	commission := float32(commerce.Commission) / 100
 	fee := amount * commission
 
 	return commerce.Commission, fee, nil

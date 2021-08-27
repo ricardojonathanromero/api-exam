@@ -22,6 +22,8 @@ func main() {
 		log.Fatalf("error configuring db session: %v", err)
 	}
 
+	defer config.CloseClient(sess)
+
 	// configure server
 	ws := server.InitServerConfig(keys, sess)
 

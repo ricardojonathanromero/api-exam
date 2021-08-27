@@ -43,7 +43,7 @@ func (c *controller) AddCommerce(ctx *gin.Context) {
 	id := primitive.NewObjectID()
 
 	err := repository.InsertCommerce(&models.Commerce{
-		MerchantID:   id,
+		ID:           id,
 		MerchantName: payload.MerchantName,
 		Commission:   payload.Commission,
 		CreatedAt:    &now,
@@ -62,13 +62,13 @@ func (c *controller) AddCommerce(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, jsend.Success(map[string]string{
 		"message":     "Commerce saved successfully",
-		"merchant_id": id.String(),
+		"merchant_id": id.Hex(),
 	}))
 	return
 }
 
 func (c *controller) UpdateCommerce(ctx *gin.Context) {
-	payload := &models.CommerceReq{}
+	payload := &models.UpdateCommerce{}
 	commerceParam := ctx.Param("commerceID")
 
 	if !primitive.IsValidObjectID(commerceParam) {
@@ -140,14 +140,14 @@ func (c *controller) UpdateCommerce(ctx *gin.Context) {
 		log.Println("document no updated")
 		ctx.JSON(http.StatusAccepted, jsend.Fail(map[string]string{
 			"message":     "Commerce no updated because currently has the same values.",
-			"merchant_id": id.String(),
+			"merchant_id": id.Hex(),
 		}))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, jsend.Success(map[string]string{
 		"message":     "Commerce updated successfully",
-		"merchant_id": id.String(),
+		"merchant_id": id.Hex(),
 	}))
 	return
 }

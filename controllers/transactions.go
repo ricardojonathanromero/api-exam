@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/banwire/api-exam/models"
+	"github.com/banwire/api-exam/utils"
 	"github.com/bostaurus/jsend"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -64,12 +65,12 @@ func (c *controller) AddTransaction(ctx *gin.Context) {
 	}
 
 	doc := &models.Transaction{
-		TransactionID: primitive.NewObjectID(),
-		MerchantID:    commerceID,
-		Amount:        payload.Amount,
-		Commission:    commission,
-		Fee:           fee,
-		CreatedAt:     &now,
+		ID:         primitive.NewObjectID(),
+		MerchantID: commerceID,
+		Amount:     utils.TruncateFloat(payload.Amount),
+		Commission: commission,
+		Fee:        utils.TruncateFloat(fee),
+		CreatedAt:  &now,
 	}
 
 	err = repository.InsertTransaction(doc)

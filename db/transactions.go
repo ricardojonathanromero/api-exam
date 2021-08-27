@@ -15,38 +15,52 @@ func (repo *repository) InsertTransaction(transaction *models.Transaction) error
 }
 
 func (repo *repository) TotalAmountByCommerce(commerceID primitive.ObjectID) (float32, error) {
-	reply := make([]*models.Profit, 0)
+	reply := &models.Profit{}
 	ctx, _ := initCtx()
 
-	cursor, err := repo.transactionCol().Aggregate(ctx, mongo.Pipeline{
-		bson.D{{"$match", bson.D{{"merchant_id", commerceID}}}},
-		bson.D{{"$group", bson.D{{"_id", "$_id"}, {"total_amount", bson.D{{"$sum", "$fee"}}}}}},
-	})
+	matchStage := bson.D{{"$match", bson.D{{"merchant_id", commerceID}}}}
+	groupStage := bson.D{{"$group", bson.D{{"_id", nil}, {"total_amount", bson.D{{"$sum", "$fee"}}}}}}
+
+	cursor, err := repo.transactionCol().Aggregate(ctx, mongo.Pipeline{matchStage, groupStage})
 	if err != nil {
 		return 0, err
 	}
 
-	defer cursor.Close(ctx)
+	defer closeCursor(cursor)
 
-	err = cursor.All(ctx, &reply)
-	return reply[0].TotalAmount, err
+	var totalAmount float32
+	for cursor.Next(ctx) {
+		err = cursor.Decode(&reply)
+		if err == nil {
+			totalAmount = float32(reply.TotalAmount)
+			break
+		}
+	}
+
+	return totalAmount, err
 }
 
 func (repo *repository) TotalAmount() (float32, error) {
-	reply := make([]*models.Profit, 0)
+	reply := &models.Profit{}
 	ctx, _ := initCtx()
 
-	cursor, err := repo.transactionCol().Aggregate(ctx, mongo.Pipeline{
-		bson.D{{"$group", bson.D{{"_id", "$_id"}, {"total_amount", bson.D{{"$sum", "$fee"}}}}}},
-	})
+	groupStage := bson.D{{"$group", bson.D{{"_id", nil}, {"total_amount", bson.D{{"$sum", "$fee"}}}}}}
+
+	cursor, err := repo.transactionCol().Aggregate(ctx, mongo.Pipeline{groupStage})
 	if err != nil {
 		return 0, err
 	}
 
-	defer cursor.Close(ctx)
-
-	err = cursor.All(ctx, &reply)
-	return reply[0].TotalAmount, err
+	defer closeCursor(cursor)
+	var totalAmount float32
+	for cursor.Next(ctx) {
+		err = cursor.Decode(&reply)
+		if err == nil {
+			totalAmount = float32(reply.TotalAmount)
+			break
+		}
+	}
+	return totalAmount, err
 }
 
 func (repo *repository) transactionCol() *mongo.Collection {

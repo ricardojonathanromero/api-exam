@@ -6,17 +6,17 @@ import (
 )
 
 type CommerceReq struct {
-	MerchantName string `json:"merchant_name"`
 	Commission   int32  `json:"commission" validate:"min=1,max=100"`
+	MerchantName string `json:"merchant_name" validate:"min=1,max=50,regexp=^([a-zA-Z&ñ\\s])+$"`
 }
 
 type UpdateCommerce struct {
-	MerchantName string `json:"merchant_name,omitempty"`
+	MerchantName string `json:"merchant_name,omitempty" validate:"min=1,max=50,regexp=^([a-zA-Z&ñ\\s])+$"`
 	Commission   int32  `json:"commission,omitempty" validate:"min=1,max=100"`
 }
 
 type Commerce struct {
-	MerchantID   primitive.ObjectID `json:"merchant_id" bson:"merchant_id,omitempty"`
+	ID           primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	MerchantName string             `json:"merchant_name" bson:"merchant_name"`
 	Commission   int32              `json:"commission" bson:"commission"`
 	CreatedAt    *time.Time         `json:"created_at" bson:"created_at,omitempty"`
